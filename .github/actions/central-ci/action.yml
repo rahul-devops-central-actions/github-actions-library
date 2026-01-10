@@ -1,0 +1,49 @@
+name: Central Secure CI
+description: Enterprise-grade centralized CI logic
+
+inputs:
+  environment:
+    required: true
+    description: Dev | UAT | Prod
+  branch:
+    required: true
+    description: Git branch name
+
+runs:
+  using: composite
+  steps:
+    # Guardrails (VERY IMPORTANT)
+    - name: Validate environment & branch
+      shell: bash
+      run: |
+        if [[ "${{ inputs.environment }}" == "Prod" && "${{ inputs.branch }}" != "Release" ]]; then
+          echo "❌ PROD can only run from Release branch"
+          exit 1
+        fi
+
+    - name: Print execution context
+      shell: bash
+      run: |
+        echo "Environment: ${{ inputs.environment }}"
+        echo "Branch: ${{ inputs.branch }}"
+
+    - name: Dev logic
+      if: ${{ inputs.environment == 'Dev' }}
+      shell: bash
+      run: |
+        echo "Running DEV checks"
+        # unit tests, lint, etc.
+
+    - name: UAT logic
+      if: ${{ inputs.environment == 'UAT' }}
+      shell: bash
+      run: |
+        echo "Running UAT validations"
+        # integration tests
+
+    - name: Prod logic
+      if: ${{ inputs.environment == 'Prod' }}
+      shell: bash
+      run: |
+        echo "Running PROD deployment"
+        # deploy steps
