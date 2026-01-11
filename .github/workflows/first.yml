@@ -12,4 +12,5 @@ jobs:
     runs-on: ${{ inputs.runner }}
     steps:
       - name: Print message
-        run: echo "Runner used: ${{ inputs.runner }}"
+        run: |
+         echo "Runner used: ${{ inputs.runner }}"
