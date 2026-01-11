@@ -1,8 +1,15 @@
-name: CI
-on: [push]
+name: Reusable CI Template
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
 
 jobs:
-  test:
-    runs-on: my-runners
+  build:
+    runs-on: ${{ inputs.runner }}
     steps:
-      - run: echo "First Runner Works !! "
+      - name: Print message
+        run: echo "Runner used: ${{ inputs.runner }}"
