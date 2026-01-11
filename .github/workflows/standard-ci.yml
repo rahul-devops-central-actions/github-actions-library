@@ -8,40 +8,57 @@ on:
         type: string
 
 jobs:
+
   Input-Validation:
     runs-on: ${{ github.repository_owner }}-runners
+
     outputs:
       environment: ${{ steps.get-environment.outputs.environment }}
-    steps:
-      - name: Define Checkout Step
-        id: define-checkout
-        run: echo "Defining reusable checkout step"
 
+    steps:
+      # Define reusable checkout step
       - &checkout_step
-        name: Checkout Repository
-        uses: actions/checkout@v3
-      
-      - *checkout_step
+        name: Checkout Developer Repository
+        uses: actions/checkout@v4
 
       - name: Input Validation
         run: |
-         echo "Config used: ${{ inputs.config }}"
-         echo "Running standard CI checks for repository: ${{ github.repository }} on branch: ${{ github.ref_name }}"
-      - name: retrieve environment gloablly
+          echo "Config used: ${{ inputs.config }}"
+          echo "Running CI checks for repo: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      # Checkout CENTRAL CI REPO (required for composite actions)
+      - name: Checkout Central CI Repo
+        uses: actions/checkout@v4
+        with:
+          repository: rahul-devops-central-actions/github-actions-library
+          ref: main
+          path: central-ci
+
+      # Call composite action from central repo
+      - name: Retrieve Environment Globally
         id: get-environment
-        uses: rahul-devops-central-actions/github-actions-library/.github/actions/populate_utils/get-environment@main
+        uses: ./central-ci/.github/actions/populate_utils/get-environment
         with:
           ref_name: ${{ github.ref_name }}
+
   Central-CI:
     needs: Input-Validation
     runs-on: ${{ github.repository_owner }}-runners
+
     steps:
       - *checkout_step
 
+      # Checkout central CI repo again for second job
+      - name: Checkout Central CI Repo
+        uses: actions/checkout@v4
+        with:
+          repository: rahul-devops-central-actions/github-actions-library
+          ref: main
+          path: central-ci
+
       - name: Central Secure CI
-        uses: rahul-devops-central-actions/github-actions-library/.github/actions/central-ci@main
+        uses: ./central-ci/.github/actions/central-ci
         with:
           environment: ${{ needs.Input-Validation.outputs.environment }}
           branch: ${{ github.ref_name }}
-        
-
