@@ -13,6 +13,16 @@ jobs:
     outputs:
       environment: ${{ steps.get-environment.outputs.environment }}
     steps:
+      - name: Define Checkout Step
+        id: define-checkout
+        run: echo "Defining reusable checkout step"
+
+      - &checkout_step
+        name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - *checkout_step
+
       - name: Input Validation
         run: |
          echo "Config used: ${{ inputs.config }}"
@@ -26,6 +36,8 @@ jobs:
     needs: Input-Validation
     runs-on: ${{ github.repository_owner }}-runners
     steps:
+      - *checkout_step
+      
       - name: Central Secure CI
         uses: ./.github/actions/central-ci
         with:
