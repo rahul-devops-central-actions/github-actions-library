@@ -29,7 +29,7 @@ jobs:
          echo "Running standard CI checks for repository: ${{ github.repository }} on branch: ${{ github.ref_name }}"
       - name: retrieve environment gloablly
         id: get-environment
-        uses: ./.github/actions/populate_utils/get-environment
+        uses: rahul-devops-central-actions/github-actions-library/.github/actions/populate_utils/get-environment@main
         with:
           ref_name: ${{ github.ref_name }}
   Central-CI:
@@ -37,9 +37,9 @@ jobs:
     runs-on: ${{ github.repository_owner }}-runners
     steps:
       - *checkout_step
-      
+
       - name: Central Secure CI
-        uses: ./.github/actions/central-ci
+        uses: rahul-devops-central-actions/github-actions-library/.github/actions/central-ci@main
         with:
           environment: ${{ needs.Input-Validation.outputs.environment }}
           branch: ${{ github.ref_name }}
