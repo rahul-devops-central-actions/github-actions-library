@@ -1,0 +1,35 @@
+name: Reusable CI Template
+
+on:
+  workflow_call:
+    inputs:
+      config:
+        required: true
+        type: string
+
+jobs:
+  Input-Validation:
+    runs-on: ${{ github.repository_owner }}-runners
+    outputs:
+      environment: ${{ steps.get-environment.outputs.environment }}
+    steps:
+      - name: Input Validation
+        run: |
+         echo "Config used: ${{ inputs.config }}"
+         echo "Running standard CI checks for repository: ${{ github.repository }} on branch: ${{ github.ref_name }}"
+      - name: retrieve environment gloablly
+        id: get-environment
+        uses: ./.github/actions/populate_utils/get-environment
+        with:
+          ref_name: ${{ github.ref_name }}
+  Central-CI:
+    needs: Input-Validation
+    runs-on: ${{ github.repository_owner }}-runners
+    steps:
+      - name: Central Secure CI
+        uses: ./.github/actions/central-ci
+        with:
+          environment: ${{ needs.Input-Validation.outputs.environment }}
+          branch: ${{ github.ref_name }}
+        
+
